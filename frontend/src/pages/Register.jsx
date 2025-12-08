@@ -138,7 +138,7 @@ export default function Register() {
             {/* STEP 2: Registration Form */}
             {step === 2 && (
               <form
-               onClick={handleSubmit}
+               onSubmit={handleSubmit}
                className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                 
                 {/* Common: Full Name */}
