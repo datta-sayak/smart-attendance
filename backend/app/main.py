@@ -25,7 +25,10 @@ def create_app() -> FastAPI:
     # CORS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=ORIGINS,
+        allow_origins=[
+            "https://sa-gl.vercel.app",     # frontend (Vercel)
+            "http://localhost:5173",        # local dev
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
