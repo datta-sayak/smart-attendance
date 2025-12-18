@@ -43,13 +43,17 @@ export default function Login() {
       localStorage.setItem("token", data.token)
       localStorage.setItem("user", JSON.stringify(data));
 
-      if(data.role === "teacher"){
+      // --- FIX: Handle role case sensitivity (Teacher/Student vs teacher/student) ---
+      const userRole = data.role ? data.role.toLowerCase() : "";
+
+      if(userRole === "teacher"){
         navigate("/dashboard");
-      } else if (data.role === "student"){
+      } else if (userRole === "student"){
         navigate("/student-dashboard");
       } else {
         navigate("/login");
       }
+      
     }
     catch (err){
       setError(err.message)
@@ -175,9 +179,9 @@ export default function Login() {
           <div className="absolute inset-0 flex items-center justify-center p-12">
              <div className="text-center space-y-4 relative z-10">
                <div className="w-64 h-64 bg-white/30 backdrop-blur-xl rounded-full mx-auto flex items-center justify-center border border-white/50 shadow-lg mb-8 relative">
-                  {/* Placeholder for the 3D illustration shown in design */}
-                  <div className="w-48 h-48 bg-indigo-600 rounded-full opacity-20 blur-3xl absolute"></div>
-                  <span className="text-6xl">🎓</span>
+                 {/* Placeholder for the 3D illustration shown in design */}
+                 <div className="w-48 h-48 bg-indigo-600 rounded-full opacity-20 blur-3xl absolute"></div>
+                 <span className="text-6xl">🎓</span>
                </div>
                <h2 className="text-2xl font-bold text-gray-800">Smart Attendance System</h2>
                <p className="text-gray-600 max-w-sm mx-auto">
