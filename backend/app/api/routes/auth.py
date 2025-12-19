@@ -41,8 +41,8 @@ async def register(payload: RegisterRequest, background_tasks: BackgroundTasks):
         "email": payload.email,
         "password_hash": hash_password(payload.password),
         "role": payload.role,
-        "is_verified": False,
-        "verification_token":verification_token,
+        "is_verified": True, # Passing True by default as email is not sending for now
+        "verification_token":"", # Passing empty vt by default as email is not sending for now
         "verification_expiry": verification_expiry,
         "created_at" : datetime.utcnow(),
     }
