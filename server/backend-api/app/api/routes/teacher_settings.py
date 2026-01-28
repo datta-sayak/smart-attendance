@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from pathlib import Path
 from datetime import datetime
 import aiofiles
-from typing import Optional
 
 from app.services.teacher_settings_service import (
     ensure_settings_for_user,
@@ -39,9 +38,7 @@ def validate_object_id(id_str: str, field_name: str = "id") -> ObjectId:
 
 # ---------------- GET SETTINGS ----------------
 @router.get("", response_model=dict)
-async def get_settings(
-    current: dict = Depends(get_current_teacher),
-):
+async def get_settings(current: dict = Depends(get_current_teacher)):
     user_id = current["id"]
     user = current["user"]
     teacher = current["teacher"]
@@ -77,6 +74,7 @@ async def patch_settings_route(
         raise HTTPException(status_code=400, detail="Invalid payload")
 
     user_id = validate_object_id(current["id"])
+    now = datetime.utcnow()
     
     # Extract fields that need to sync across collections
     user_updates = {}
@@ -89,32 +87,66 @@ async def patch_settings_route(
     if "email" in payload:
         user_updates["email"] = payload["email"]
         teacher_updates["email"] = payload["email"]
-    
-    # Execute updates atomically if possible
+
+    # Update users collection
     if user_updates:
         await db.users.update_one(
             {"_id": user_id},
-            {"$set": {**user_updates, "updated_at": datetime.utcnow()}}
+            {"$set": {**user_updates, "updated_at": now}}
         )
-    
+
+    # ✅ FIXED: Update teachers collection (supports both userId and user_id schemas)
     if teacher_updates:
-        await db.teachers.update_one(
-            {"userId": user_id},
-            {"$set": {**teacher_updates, "updated_at": datetime.utcnow()}}
+        result = await db.teachers.update_one(
+            {
+                "$or": [
+                    {"userId": user_id},
+                    {"user_id": user_id}
+                ]
+            },
+            {"$set": {**teacher_updates, "updated_at": now}}
         )
-    
-    # Remove synced fields from payload to avoid double updates in patch_settings
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Teacher profile not found")
+
+    # Clean payload for teacher-specific settings
     cleaned_payload = {
         k: v for k, v in payload.items() 
         if k not in ("name", "email")
     }
-    
+
     if cleaned_payload:
-        updated = await patch_settings(current["id"], cleaned_payload)
-        return serialize_bson(updated)
+        await patch_settings(current["id"], cleaned_payload)
     
-    # If only synced fields were updated, fetch fresh settings
-    return await get_settings(current)
+    # ✅ FIXED: Return fresh data (query supports both field names)
+    fresh_user = await db.users.find_one({"_id": user_id})
+    fresh_teacher = await db.teachers.find_one(
+        {"$or": [{"userId": user_id}, {"user_id": user_id}]}
+    )
+    
+    if not fresh_user or not fresh_teacher:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    # Construct response with fresh data
+    profile = {
+        "id": user_id,
+        "name": fresh_user.get("name", ""),
+        "email": fresh_user.get("email", ""),
+        "phone": fresh_teacher.get("profile", {}).get("phone", ""),
+        "role": "teacher",
+        "employee_id": fresh_teacher.get("employee_id"),
+        "subjects": fresh_teacher.get("profile", {}).get("subjects", []),
+        "department": fresh_teacher.get("department"),
+        "avatarUrl": fresh_teacher.get("avatarUrl"),
+    }
+    
+    doc = await ensure_settings_for_user(user_id, profile)
+    
+    subject_ids = fresh_teacher.get("profile", {}).get("subjects", [])
+    populated_subjects = await get_subjects_by_ids(subject_ids)
+    doc["profile"]["subjects"] = populated_subjects
+    
+    return serialize_bson(doc)
 
 # ---------------- PUT SETTINGS ----------------
 @router.put("", response_model=dict)
@@ -131,52 +163,46 @@ async def put_settings_route(
 # ---------------- AVATAR UPLOAD ----------------
 UPLOAD_DIR = Path("app/static/avatars")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB limit
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 @router.post("/upload-avatar", response_model=dict)
 async def upload_avatar(
     file: UploadFile = File(...),
     current: dict = Depends(get_current_teacher),
 ):
-    # Validate file type
     ext = Path(file.filename).suffix.lower()
     if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
-        raise HTTPException(status_code=400, detail="Unsupported file type. Use: jpg, png, webp")
+        raise HTTPException(status_code=400, detail="Unsupported file type")
     
-    # Validate content type
     allowed_content_types = {"image/jpeg", "image/png", "image/webp"}
     if file.content_type not in allowed_content_types:
         raise HTTPException(status_code=400, detail="Invalid file content type")
     
-    # Read and check file size
     contents = await file.read()
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large. Max 5MB")
     
-    # Generate unique filename
-    fname = f"{current['id']}_{datetime.utcnow().timestamp()}{ext}"
+    fname = f"{current['id']}_{int(datetime.utcnow().timestamp())}{ext}"
     dest = UPLOAD_DIR / fname
-    
-    # Save file
+
     try:
         async with aiofiles.open(dest, "wb") as out:
             await out.write(contents)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
-    
+
     avatar_url = f"/static/avatars/{fname}"
-    
-    # Update settings
+
     updated = await patch_settings(
         current["id"],
         {"profile": {"avatarUrl": avatar_url}},
     )
-    
+
     return {
         "avatarUrl": avatar_url,
         "settings": serialize_bson(updated),
     }
-
+    
 @router.post("/add-subject", response_model=dict)
 async def add_subject(
     payload: dict,
@@ -188,9 +214,6 @@ async def add_subject(
     if not name or not code:
         raise HTTPException(status_code=400, detail="Name and Code required")
     
-    if len(name) > 100 or len(code) > 20:
-        raise HTTPException(status_code=400, detail="Name or Code too long")
-    
     subject = await add_subject_for_teacher(
         current["id"],
         name.strip(),
@@ -199,13 +222,13 @@ async def add_subject(
     
     return serialize_bson(subject)
 
-@router.get("/my-subjects", response_model=list)  # Changed from /teachers/me/subjects
+@router.get("/my-subjects", response_model=list)
 async def get_my_subjects(current_user: dict = Depends(get_current_teacher)):
     prof_id = validate_object_id(current_user["id"])
     
     subjects = await db.subjects.find(
         {"professor_ids": prof_id}
-    ).to_list(length=100)  # Add limit
+    ).to_list(length=100)
     
     return [
         {
@@ -218,7 +241,7 @@ async def get_my_subjects(current_user: dict = Depends(get_current_teacher)):
     ]
     
 # GET STUDENTS OF A SUBJECT
-@router.get("/subjects/{subject_id}/students", response_model=list)  # Simplified path
+@router.get("/subjects/{subject_id}/students", response_model=list)
 async def get_subject_students(
     subject_id: str,
     current_user: dict = Depends(get_current_teacher)
@@ -226,11 +249,11 @@ async def get_subject_students(
     prof_id = validate_object_id(current_user["id"])
     subj_id = validate_object_id(subject_id, "subject_id")
     
-    # SECURITY FIX: Ensure teacher teaches this subject
+    # SECURITY: Ensure teacher teaches this subject
     subject = await db.subjects.find_one(
         {
             "_id": subj_id,
-            "professor_ids": prof_id  # 🔒 Authorization check
+            "professor_ids": prof_id
         },
         {"students": 1, "name": 1}
     )
@@ -244,7 +267,6 @@ async def get_subject_students(
     
     student_user_ids = [s["student_id"] for s in subject_students]
     
-    # Fetch students and users in parallel
     students_cursor = db.students.find({"userId": {"$in": student_user_ids}})
     users_cursor = db.users.find({"_id": {"$in": student_user_ids}})
     
@@ -262,7 +284,7 @@ async def get_subject_students(
         uid = str(s["student_id"])
         user = users.get(uid)
         if not user:
-            continue  # Skip orphaned references
+            continue
             
         student_doc = students_map.get(uid, {})
         
@@ -293,7 +315,7 @@ async def verify_student(
     result = await db.subjects.update_one(
         {
             "_id": subj_id,
-            "professor_ids": prof_id,  # 🔒 Ensure teacher owns this subject
+            "professor_ids": prof_id,
             "students.student_id": stud_id
         },
         {
@@ -302,7 +324,6 @@ async def verify_student(
     )
     
     if result.modified_count == 0:
-        # Check if subject exists to return accurate error
         exists = await db.subjects.find_one({"_id": subj_id})
         if not exists:
             raise HTTPException(status_code=404, detail="Subject not found")
@@ -320,7 +341,6 @@ async def remove_student(
     subj_id = validate_object_id(subject_id, "subject_id")
     stud_id = validate_object_id(student_id, "student_id")
     
-    # Verify teacher teaches this subject
     subject = await db.subjects.find_one(
         {"_id": subj_id, "professor_ids": prof_id},
         {"_id": 1}
@@ -328,21 +348,11 @@ async def remove_student(
     if not subject:
         raise HTTPException(status_code=404, detail="Subject not found or access denied")
     
-    # Start session for transaction (if MongoDB replica set enabled)
-    # TODO: Use transactions for production consistency
-    # async with await db.client.start_session() as session:
-    #     with session.start_transaction():
-    
-    # 1️⃣ Remove from subject.students
-    result = await db.subjects.update_one(
+    await db.subjects.update_one(
         {"_id": subj_id},
         {"$pull": {"students": {"student_id": stud_id}}}
     )
-    
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Student not found in this subject")
-    
-    # 2️⃣ Remove subject from student.subjects
+
     await db.students.update_one(
         {"userId": stud_id},
         {"$pull": {"subjects": subj_id}}
