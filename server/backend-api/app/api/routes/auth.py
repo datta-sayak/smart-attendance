@@ -42,6 +42,7 @@ async def register(payload: RegisterRequest, background_tasks: BackgroundTasks):
         "email": payload.email,
         "password_hash": hash_password(payload.password),
         "role": payload.role,
+        "college_name": payload.college_name,
         "is_verified": False,  # Changed to False for email verification flow
         "verification_token": verification_token,  # Store the actual token
         "verification_expiry": verification_expiry,
@@ -61,6 +62,7 @@ async def register(payload: RegisterRequest, background_tasks: BackgroundTasks):
                 "userId": created_user_id,
                 "name": payload.name,
                 "email": payload.email,
+                "college_name": payload.college_name,
                 "branch": payload.branch,
                 "roll":payload.roll,
                 "year":payload.year,
@@ -77,6 +79,7 @@ async def register(payload: RegisterRequest, background_tasks: BackgroundTasks):
             teacher_doc = {
                 "userId": created_user_id,
                 "employee_id":payload.employee_id,
+                "college_name": payload.college_name,
                 "phone":payload.phone,
                 "branch":payload.branch,
                 "subjects": [],
@@ -143,6 +146,7 @@ async def register(payload: RegisterRequest, background_tasks: BackgroundTasks):
         "email": payload.email,
         "role": payload.role,
         "name": payload.name,
+        "college_name": payload.college_name,
         "token": token
     }
 

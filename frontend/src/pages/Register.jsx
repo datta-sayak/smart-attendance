@@ -28,6 +28,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    collegeName: "",
     password: "",
     branch: "",
     employee_id: "",
@@ -57,6 +58,7 @@ export default function Register() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        college_name: formData.collegeName,
         branch:formData.branch,
         employee_id: role === "teacher" ? formData.employee_id : undefined,
         phone: role === "teacher" ? formData.phone : undefined,
@@ -178,6 +180,21 @@ export default function Register() {
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all pl-10"
                     />
                     <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
+                {/* Common: College Name */}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-semibold text-gray-700">College Name</label>
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      name="collegeName"
+                      value={formData.collegeName}
+                      onChange={handleChange}
+                      placeholder="Your college/institution"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all pl-10"
+                    />
+                    <GraduationCap size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
                 </div>
                 {/* -------- Branch -------- */}

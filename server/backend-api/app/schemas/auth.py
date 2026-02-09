@@ -12,6 +12,7 @@ class UserResponse(BaseModel):
     email: str
     role: str
     name: str
+    college_name: str
     token: str
 
 class RegisterRequest(BaseModel):
@@ -19,6 +20,7 @@ class RegisterRequest(BaseModel):
     name: str
     email: EmailStr
     password: constr(min_length=6, max_length=72)
+    college_name: str
     
     # Student
     branch: Optional[str] = None
