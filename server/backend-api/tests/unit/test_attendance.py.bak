@@ -1,0 +1,58 @@
+
+import pytest
+from datetime import datetime
+from bson import ObjectId
+from app.services.attendance import mark_attendance, get_attendance_for_student
+from unittest.mock import MagicMock, AsyncMock
+
+@pytest.mark.asyncio
+async def test_mark_attendance(mock_db):
+    # Arrange
+    inserted_id = ObjectId()
+    mock_db.attendance.insert_one.return_value = MagicMock(inserted_id=inserted_id)
+    mock_db.attendance.find_one.return_value = {
+        "_id": inserted_id,
+        "student_id": "123",
+        "present": True,
+        "created_at": "2024-01-01"
+    }
+    
+    payload = {"student_id": "123", "present": True}
+    
+    # Act
+    result = await mark_attendance(payload)
+    
+    # Assert
+    assert result["_id"] == str(inserted_id)
+    assert result["present"] is True
+    # Verify created_at was added
+    mock_db.attendance.insert_one.assert_called_once()
+    call_args = mock_db.attendance.insert_one.call_args[0][0]
+    assert "created_at" in call_args
+
+@pytest.mark.asyncio
+async def test_get_attendance_for_student(mock_db):
+    # Arrange
+    student_id = str(ObjectId())
+    
+    mock_cursor = MagicMock()
+    # Simulate async iteration
+    # Because find() returns a cursor, and the code does `async for r in cursor`
+    # we need __aiter__ on the return value of find()
+    
+    record1 = {"_id": ObjectId(), "date": "2024-01-01", "present": True}
+    record2 = {"_id": ObjectId(), "date": "2024-01-02", "present": False}
+    
+    async def async_gen():
+        yield record1
+        yield record2
+    
+    mock_db.attendance.find.return_value.__aiter__.side_effect = async_gen
+    
+    # Act
+    result = await get_attendance_for_student(student_id)
+    
+    # Assert
+    assert len(result) == 2
+    assert result[0]["_id"] == str(record1["_id"])
+    assert result[1]["_id"] == str(record2["_id"])
