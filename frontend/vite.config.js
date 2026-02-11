@@ -5,7 +5,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://smart-attendance-api-i87a.onrender.com",
+        target: "http://localhost:8000/api",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
