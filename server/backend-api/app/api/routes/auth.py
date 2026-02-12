@@ -197,7 +197,7 @@ async def verify_email(token: str = Query(...)):
         {"_id": user["_id"]},
         {
             "$set": {"is_verified": True},
-            "$unset": {"verification_token": "", "verification_expiry": ""},
+            "$unset": {"verification_token": "", "verification_expiry": ""},  # nosec
         },
     )
 

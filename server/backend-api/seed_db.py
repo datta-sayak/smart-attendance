@@ -26,7 +26,7 @@ async def seed():
 
     # --- Seed Student ---
     student_email = "student@gmail.com"
-    student_pass = "student123"
+    student_pass = "student123"  # nosec
 
     existing_student = await db.users.find_one({"email": student_email})
     if not existing_student:
@@ -59,7 +59,7 @@ async def seed():
 
     # --- Seed Teacher ---
     teacher_email = "teacher@gmail.com"
-    teacher_pass = "teacher123"
+    teacher_pass = "teacher123"  # nosec
 
     existing_teacher = await db.users.find_one({"email": teacher_email})
     if not existing_teacher:

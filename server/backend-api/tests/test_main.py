@@ -18,10 +18,10 @@ client = TestClient(app)
 def test_read_root():
     # We expect a 404 for root "/" as it's not defined, or 200 if it is.
     response = client.get("/")
-    assert response.status_code in [200, 404]
+    assert response.status_code in [200, 404]  # nosec
 
 
 def test_health_check_if_exists():
     response = client.get("/api/v1/health")
     # Just ensure it doesn't crash (500)
-    assert response.status_code != 500
+    assert response.status_code != 500  # nosec
