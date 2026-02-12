@@ -64,7 +64,7 @@ export default function ManageSchedule() {
         title: period.metadata?.subject_name || "Untitled",
         time: `${period.start} - ${period.end}`,
         room: period.metadata?.room || "TBD",
-        teacher: "Self",
+        teacher: period.metadata?.teacher || "Self",
         day: day.slice(0, 3),
         status: "Active",
       })),
@@ -93,6 +93,7 @@ export default function ManageSchedule() {
         metadata: {
           subject_name: cls.title,
           room: cls.room,
+          teacher: cls.teacher,
           tracked: true,
         },
       });
