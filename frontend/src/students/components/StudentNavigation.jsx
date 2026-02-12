@@ -1,7 +1,7 @@
 // StudentNavigation.jsx
 import {CircleUser, LogOut, CalendarDays} from "lucide-react";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Home, BookOpen, TrendingUp, User } from "lucide-react";
 
@@ -14,7 +14,8 @@ const navItems = [
 ];
 
 /* ---------------------- DESKTOP NAV ITEM ---------------------- */
-function DesktopItem({ icon: Icon, label, active, path }) {
+// eslint-disable-next-line no-unused-vars
+function DesktopItem({ icon: IconComponent, label, active, path }) {
   return (
     <Link
       to={path}
@@ -24,14 +25,15 @@ function DesktopItem({ icon: Icon, label, active, path }) {
           : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
       }`}
     >
-      <Icon size={20} />
+      <IconComponent size={20} />
       {label}
     </Link>
   );
 }
 
 /* ---------------------- MOBILE NAV ITEM ---------------------- */
-function MobileItem({ icon: Icon, label, active, path }) {
+// eslint-disable-next-line no-unused-vars
+function MobileItem({ icon: IconComponent, label, active, path }) {
   return (
     <Link
       to={path}
@@ -40,7 +42,7 @@ function MobileItem({ icon: Icon, label, active, path }) {
       }`}
     >
       <div className={`p-1.5 rounded-xl ${active ? "bg-blue-50" : ""}`}>
-        <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+        <IconComponent size={20} strokeWidth={active ? 2.5 : 2} />
       </div>
       <span className="text-[10px] font-medium">{label}</span>
     </Link>
@@ -49,16 +51,14 @@ function MobileItem({ icon: Icon, label, active, path }) {
 
 /* ---------------------- MAIN NAVIGATION ---------------------- */
 export default function StudentNavigation({ activePage = "home" }) {
-  const [username, setUsername] = useState("");
-  useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (!stored) return; 
-
+  const [username] = useState(() => {
     try {
-      const userObj = JSON.parse(stored);
-      setUsername(userObj.name);
-    } catch {}
-  }, []);
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored).name : "";
+    } catch {
+      return "";
+    }
+  });
 
   const navigate = useNavigate();
 

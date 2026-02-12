@@ -75,7 +75,7 @@ async def upload_image_url(
         if not ml_response.get("success"):
             raise HTTPException(
                 status_code=400,
-                detail=f"Face encoding failed: {ml_response.get('error', 'Unknown error')}",
+                detail=f"Face encoding failed: {ml_response.get('error', 'Unknown error')}",  # noqa: E501
             )
 
         embedding = ml_response.get("embedding")

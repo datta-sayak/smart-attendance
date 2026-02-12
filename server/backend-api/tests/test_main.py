@@ -9,7 +9,7 @@ sys.modules["pymongo"] = MagicMock()
 sys.modules["app.services.ml_client"] = MagicMock()
 sys.modules["app.services.attendance_daily"] = MagicMock()
 
-from app.main import app
+from app.main import app  # noqa: E402
 
 
 client = TestClient(app)

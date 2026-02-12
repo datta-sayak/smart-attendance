@@ -54,7 +54,7 @@ export default function Settings() {
   const [sensitivity, setSensitivity] = useState(80);
 
   // State for email preff
-  const [emailPreferences, setEmailPreferences] = useState(false);
+  const [_emailPreferences, setEmailPreferences] = useState(false);
 
   // Contributors state
   const [contributors, setContributors] = useState([]);
@@ -223,12 +223,7 @@ export default function Settings() {
     }
   }
 
-  function removeSubject(idx) {
-    setProfile((prev) => ({
-      ...prev,
-      subjects: prev.subjects.filter((_, i) => i != idx),
-    }));
-  }
+
 
   // avatar upload handler
   async function onAvatarSelected(e) {
@@ -243,7 +238,7 @@ export default function Settings() {
         ...prev,
         avatarUrl: res.avatarUrl ?? prev.avatarUrl,
       }));
-    } catch (err) {
+    } catch {
       console.error("Avatar upload failed");
       setSaveError("Avatar Upload Failed");
     }
@@ -653,7 +648,7 @@ export default function Settings() {
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {profile.subjects && profile.subjects.length > 0 ? (
-                      profile.subjects.map((sub, idx) => (
+                      profile.subjects.map((sub) => (
                         <div
                           key={sub._id}
                           className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-sm font-medium flex items-center gap-2"

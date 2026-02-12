@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
         logger.info("attendance_daily indexes ensured")
     except Exception as e:
         logger.warning(
-            f"Could not connect to MongoDB. Application will continue, but DB features will fail. Error: {e}"
+            f"Could not connect to MongoDB. Application will continue, but DB features will fail. Error: {e}"  # noqa: E501
         )
         logger.warning("Please check your MONGO_URI in .env")
 
@@ -55,7 +55,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # SessionMiddleware MUST be added before routers so authlib can use request.session reliably
+    # SessionMiddleware MUST be added before routers so authlib can use request.session reliably  # noqa: E501
     app.add_middleware(
         SessionMiddleware,
         secret_key=os.getenv("SESSION_SECRET_KEY", "kuch-to12hai-mujhse-raita"),

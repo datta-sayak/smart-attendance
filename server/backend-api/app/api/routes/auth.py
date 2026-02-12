@@ -150,7 +150,7 @@ async def register(payload: RegisterRequest, background_tasks: BackgroundTasks):
 async def login(payload: LoginRequest):
     print(f"Login request received for email: {payload.email}")
     email = payload.email
-    password = payload.password
+
 
     user = await db.users.find_one({"email": payload.email})
 
@@ -240,7 +240,7 @@ async def google_callback(request: Request):
     if not user:
         raise HTTPException(
             status_code=400,
-            detail="No account associated with this Google email. Please sign up first.",
+            detail="No account associated with this Google email. Please sign up first.",  # noqa: E501
         )
 
     if not user.get("is_verified", False):

@@ -7,8 +7,13 @@ on:
     branches: ["main"]
 
 jobs:
+jobs:
   backend-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server/backend-api
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,15 +25,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r server/backend-api/requirements.txt
+          pip install -r requirements.txt
 
       - name: Run Backend Tests
         env:
           MONGO_URI: mongodb://localhost:27017
           JWT_SECRET: test_secret
-        run: |
-          cd server/backend-api
-          pytest
+        run: pytest
 
   frontend-test:
     runs-on: ubuntu-latest

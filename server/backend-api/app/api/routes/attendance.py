@@ -48,7 +48,7 @@ async def mark_attendance(payload: Dict):
         _, image_b64 = image_b64.split(",", 1)
 
     try:
-        image_bytes = base64.b64decode(image_b64)
+        _ = base64.b64decode(image_b64)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid base64 image")
 
@@ -107,7 +107,7 @@ async def mark_attendance(payload: Dict):
         if not match_response.get("success"):
             raise HTTPException(
                 status_code=500,
-                detail=f"ML service error: {match_response.get('error', 'Unknown error')}",
+                detail=f"ML service error: {match_response.get('error', 'Unknown error')}",  # noqa: E501
             )
 
         matches = match_response.get("matches", [])
