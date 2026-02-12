@@ -233,7 +233,7 @@ const handleSave = async () => {
 
               {/* Calendar Grid */}
               <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-center text-sm mb-2">
-                {days.map(d => (
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
                   <span key={d} className="text-xs font-medium text-[var(--text-body)]">{d}</span>
                 ))}
               </div>
