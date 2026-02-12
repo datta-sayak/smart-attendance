@@ -62,7 +62,8 @@ export default function ManageSchedule() {
       periods.map((period) => ({
         id: `${day}-${period.slot}`,
         title: period.metadata?.subject_name || "Untitled",
-        time: `${period.start} - ${period.end}`,
+        startTime: period.start || "00:00", 
+        endTime: period.end || "00:00",
         room: period.metadata?.room || "TBD",
         teacher: period.metadata?.teacher || "Self",
         day: day.slice(0, 3),
@@ -84,12 +85,10 @@ export default function ManageSchedule() {
     scheduleData.forEach((cls, index) => {
       const fullDay = fullDayMap[cls.day] || cls.day || "Unknown";
       if (!grouped[fullDay]) grouped[fullDay] = [];
-      const timeParts = cls.time.split(/\s*-\s*/);
-      const [start = "", end = ""] = timeParts;
       grouped[fullDay].push({
         slot: grouped[fullDay].length + 1,
-        start,
-        end,
+        start: cls.startTime,
+        end: cls.endTime,
         metadata: {
           subject_name: cls.title,
           room: cls.room,
@@ -129,7 +128,8 @@ export default function ManageSchedule() {
     const newClass = {
       id: Date.now(),
       title: "New Subject",
-      time: "12:00 - 13:00",
+      startTime: "12:00",
+      endTime: "13:00",
       room: "TBD",
       teacher: "Assign Teacher",
       day: activeDay,
@@ -182,16 +182,26 @@ export default function ManageSchedule() {
                   className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2 outline-none focus:ring-2 ring-[var(--primary)]"
                 />
               </div>
+              <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium mb-1">Time (Start - End)</label>
+                <label className="block text-sm font-medium mb-1">Start Time</label>
                 <input 
-                  type="text" 
-                  value={currentClass.time}
-                  placeholder="09:00 - 10:00"
-                  onChange={(e) => setCurrentClass({...currentClass, time: e.target.value})}
+                  type="time" 
+                  value={currentClass.startTime}
+                  onChange={(e) => setCurrentClass({...currentClass, startTime: e.target.value})}
                   className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2 outline-none focus:ring-2 ring-[var(--primary)]"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">End Time</label>
+                <input 
+                  type="time" 
+                  value={currentClass.endTime}
+                  onChange={(e) => setCurrentClass({...currentClass, endTime: e.target.value})}
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2 outline-none focus:ring-2 ring-[var(--primary)]"
+                />
+              </div>
+            </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">Room</label>
@@ -304,7 +314,7 @@ export default function ManageSchedule() {
                     </div>
                   </div>
                   <p className="text-sm font-medium text-[var(--text-main)] mb-3">
-                     {cls.time}
+                     {cls.startTime} - {cls.endTime}
                   </p>
 
                   <div className="flex justify-between items-end border-t border-[var(--border-color)] pt-3">
