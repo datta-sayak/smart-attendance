@@ -1,5 +1,6 @@
 from app.db.mongo import db
 from bson import ObjectId
+from typing import Optional
 
 students_col = db["students"]
 users_col = db["users"]
@@ -63,7 +64,10 @@ async def get_student_profile(user_id: str):
     return profile
 
 
-async def build_attendance_summary(student_doc_id: ObjectId, subject_id: ObjectId = None):
+async def build_attendance_summary(
+    student_doc_id: ObjectId,
+    subject_id: Optional[ObjectId] = None,
+):
     """
     Returns attendance stats for a student.
     If subject_id is provided, filters by that subject.
