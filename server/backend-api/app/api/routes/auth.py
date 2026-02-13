@@ -273,7 +273,7 @@ async def google_callback(request: Request):
             {"_id": user["_id"]},
             {
                 "$set": {"is_verified": True},
-            "$unset": {  # nosec B105 - MongoDB unset operator, not a password
+                "$unset": {  # nosec B105 - MongoDB unset operator, not a password
                     "verification_token": 1,
                     "verification_expiry": 1,
                 },
