@@ -260,12 +260,13 @@ export default function ForgotPassword() {
           )}
 
           {error && (
-            <p
+            <div
               role="alert"
-              className="text-sm font-medium text-[var(--text-main)] border-l-4 border-[var(--primary)] pl-3"
+              className="flex items-start gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2.5 text-sm text-[var(--text-main)]"
             >
-              {error}
-            </p>
+              <span className="mt-0.5">⚠️</span>
+              <span>{error}</span>
+            </div>
           )}
 
           {success && (
