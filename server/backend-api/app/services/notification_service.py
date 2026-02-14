@@ -464,11 +464,16 @@ class NotificationService:
             if ntype not in sent_by_type:
                 sent_by_type[ntype] = {"sent": 0, "failed": 0}
 
-            sent_by_type[ntype][status] += count
+            # Use .get() to safely handle unexpected status values
+            if status in ["sent", "failed"]:
+                sent_by_type[ntype][status] += count
 
-        # Get recent logs
+        # Get recent logs within the time window
         recent_logs = await db.email_logs.find(
-            {"sent_by": ObjectId(teacher_id)},
+            {
+                "sent_by": ObjectId(teacher_id),
+                "sent_at": {"$gte": since_date}
+            },
             {"_id": 0}
         ).sort("sent_at", -1).limit(10).to_list(length=10)
 

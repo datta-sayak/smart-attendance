@@ -75,7 +75,7 @@ class BrevoEmailService:
                 html_content=otp_email_template(otp, user_name),
             )
         except Exception as e:
-            logger.error(f"Failed to send OTP email to {to_email}: {e}")
+            logger.error(f"Failed to send OTP email: {e}")
             raise
 
     @staticmethod

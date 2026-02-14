@@ -25,8 +25,13 @@ import Spinner from "../components/Spinner";
 
 export default function Messaging() {
   const [user] = useState(() => {
-    const data = localStorage.getItem("user");
-    return data ? JSON.parse(data) : null;
+    try {
+      const data = localStorage.getItem("user");
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error("Failed to parse user data:", error);
+      return null;
+    }
   });
 
   const [activeTab, setActiveTab] = useState("absence");
@@ -600,7 +605,7 @@ export default function Messaging() {
 
               {loadingStudents ? (
                 <div className="flex justify-center py-8">
-                  <Spinner />
+                  <Spinner message="Loading students..." />
                 </div>
               ) : (
                 <div className="max-h-96 overflow-y-auto space-y-2">

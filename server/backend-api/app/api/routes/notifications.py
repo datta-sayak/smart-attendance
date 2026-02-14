@@ -197,7 +197,7 @@ async def get_email_statistics(
 async def check_duplicate_email(
     notification_type: str,
     recipient_email: str,
-    within_hours: int = 1,
+    within_hours: int = Query(1, ge=1, le=168),  # 1 hour to 1 week
     current_user: dict = Depends(get_current_user),
 ):
     """

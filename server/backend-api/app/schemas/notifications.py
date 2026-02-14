@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 class SendAbsenceNotificationRequest(BaseModel):
     """Request to send absence notification."""
-    student_emails: List[EmailStr]
+    student_emails: List[EmailStr] = Field(..., max_length=200)
     subject: str
     date: str
     teacher_name: str
@@ -26,7 +26,7 @@ class SendLowAttendanceWarningRequest(BaseModel):
 
 class SendAssignmentReminderRequest(BaseModel):
     """Request to send assignment reminder."""
-    student_emails: List[EmailStr]
+    student_emails: List[EmailStr] = Field(..., max_length=200)
     assignment_title: str
     subject: str
     due_date: str
@@ -35,7 +35,7 @@ class SendAssignmentReminderRequest(BaseModel):
 
 class SendExamAlertRequest(BaseModel):
     """Request to send exam alert."""
-    student_emails: List[EmailStr]
+    student_emails: List[EmailStr] = Field(..., max_length=200)
     exam_name: str
     subject: str
     exam_date: str
@@ -45,7 +45,7 @@ class SendExamAlertRequest(BaseModel):
 
 class SendCustomMessageRequest(BaseModel):
     """Request to send custom message."""
-    student_emails: List[EmailStr]
+    student_emails: List[EmailStr] = Field(..., max_length=200)
     message_title: str
     message_body: str = Field(..., min_length=1, max_length=2000)
     teacher_name: str
