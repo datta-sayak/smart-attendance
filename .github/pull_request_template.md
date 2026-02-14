@@ -1,11 +1,11 @@
 # 🔥 Pull Request Summary
-Explain what this PR does in 2-3 sentences.  
+Explain what this PR does in 2-3 sentences.
 What feature, fix, or improvement did you add?
 
 ---
 
 # 🔗 Linked Issue
-Write the issue number this PR is linked with.  
+Write the issue number this PR is linked with.
 Example: **Closes #12** — this automatically links & closes the issue when PR is merged
 
 Closes #
@@ -64,17 +64,17 @@ Describe what should happen after the changes.
 # ✔ Checklist Before Submitting
 
 - [ ] My code follows the project's code style and conventions
-- [ ] Code compiles/runs without errors  
+- [ ] Code compiles/runs without errors
 - [ ] I have tested my changes locally
 - [ ] No breaking changes introduced
 - [ ] I have updated relevant documentation (if needed)
 - [ ] I have added/updated tests (if applicable)
-- [ ] All existing tests are passing  
+- [ ] All existing tests are passing
 - [ ] I have self-reviewed my code
 - [ ] I have commented my code where necessary
 
 ---
 
 # 📝 Additional Notes (Optional)
-Anything extra that the reviewer should know?  
+Anything extra that the reviewer should know?
 (Dependencies added, configuration changes, migration steps, etc.)
