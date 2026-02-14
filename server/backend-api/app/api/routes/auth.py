@@ -192,7 +192,8 @@ async def login(payload: LoginRequest):
 # ----- Forgot Password flow (Issue #196, #226) -----
 
 OTP_FAILED_ATTEMPTS_MAX = 5
-"""Maximum failed OTP verification attempts before the OTP is cleared (brute-force protection)."""
+"""Maximum failed OTP verification attempts before the 
+OTP is cleared (brute-force protection)."""
 
 GENERIC_OTP_ERROR = "Invalid or expired OTP"
 """Generic error message for OTP failures to prevent email enumeration."""
