@@ -99,7 +99,7 @@ jobs:
         run: |
           echo "Waiting for MongoDB to be ready..."
           for i in {1..30}; do
-            if nc -z localhost 27017 2>/dev/null || python3 -c "import socket; s = socket.socket(); s.settimeout(1); s.connect(('localhost', 27017)); s.close()" 2>/dev/null; then
+            if nc -z localhost 27017 2>/dev/null || python3 -c "import socket; sock = socket.socket(); sock.settimeout(1); result = sock.connect_ex(('localhost', 27017)); sock.close(); exit(result)" 2>/dev/null; then
               echo "MongoDB is ready."
               exit 0
             fi
