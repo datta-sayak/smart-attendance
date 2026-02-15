@@ -1,4 +1,8 @@
 import os
+import sys
+import asyncio
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import pytest_asyncio
 from datetime import datetime, timedelta, timezone
@@ -8,6 +12,17 @@ from motor.motor_asyncio import AsyncIOMotorClient
 # Set environment variable BEFORE any app import
 os.environ["MONGO_DB_NAME"] = "test_smart_attendance"
 os.environ["JWT_SECRET"] = "test-secret-key-123"
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Provide a fresh event loop per test session (avoids closed-loop errors)."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -63,6 +78,16 @@ async def client(db):
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
+
+
+@pytest.fixture(autouse=True)
+def mock_ml_client():
+    """Mock ML client to avoid closing the event loop during tests."""
+    with patch("app.services.ml_client.ml_client") as mock:
+        mock.close = AsyncMock()
+        mock.detect_faces = AsyncMock(return_value={"success": True, "faces": []})
+        mock.get_embeddings = AsyncMock(return_value={"success": True, "embeddings": []})
+        yield mock
 
 
 @pytest.fixture

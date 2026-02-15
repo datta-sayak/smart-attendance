@@ -36,7 +36,9 @@ from app.ml.face_detector import detect_faces
 from app.ml.face_encoder import get_face_embedding
 from app.ml.face_matcher import cosine_similarity
 
-router = APIRouter(prefix="/api/ml", tags=["ML"], dependencies=[Depends(verify_api_key)])
+router = APIRouter(
+    prefix="/api/ml", tags=["ML"], dependencies=[Depends(verify_api_key)]
+)
 
 
 @router.post("/encode-face", response_model=EncodeFaceResponse)

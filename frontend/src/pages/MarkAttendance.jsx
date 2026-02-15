@@ -40,15 +40,14 @@ export default function MarkAttendance() {
   const [attendanceSubmitted, setAttendanceSubmitted] = useState(false);
   
   const [currentCoords, setCurrentCoords] = useState(null);
-  const [locationError, setLocationError] = useState(null);
+  const [locationError, setLocationError] = useState(
+    !navigator.geolocation ? "Geolocation is not supported by your browser" : null
+  );
   const currentCoordsRef = useRef(null);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      console.warn("Geolocation not supported");
-      setLocationError("Geolocation is not supported by your browser");
-      return;
-    }
+    if (!navigator.geolocation) return;
+
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         const coords = {
