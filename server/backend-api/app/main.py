@@ -13,7 +13,7 @@ from .api.routes.attendance import router as attendance_router
 from .api.routes.auth import router as auth_router
 from .api.routes.students import router as students_router
 from .api.routes.notifications import router as notifications_router
-from .core.config import APP_NAME
+from .core.config import APP_NAME, ORIGINS
 from app.services.attendance_daily import (
     ensure_indexes as ensure_attendance_daily_indexes,
 )
@@ -69,10 +69,7 @@ def create_app() -> FastAPI:
     # CORS MUST be added FIRST so headers are present even on errors
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-        ],
+        allow_origins=ORIGINS,
         allow_origin_regex=r"https://.*\.vercel\.app",
         allow_credentials=True,
         allow_methods=["*"],
