@@ -99,7 +99,7 @@ export default function MarkWithQR() {
             <main className="flex-1 p-6 flex flex-col items-center justify-center max-w-lg mx-auto w-full">
 
                 {status === "idle" && (
-                    <div className="space-y-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 text">
+                    <div className="space-y-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="relative mx-auto w-48 h-48 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shadow-inner">
                             <QrCode size={80} strokeWidth={1.5} />
                             <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-3 rounded-2xl shadow-lg animate-bounce duration-[2000ms]">
