@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import {
@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [mlStatus, setMlStatus] = useState("checking"); // checking, ready, waking-up
   const [todayClasses, setTodayClasses] = useState([]);
   const [loadingSchedule, setLoadingSchedule] = useState(true);
+  const [tick, setTick] = useState(0); // Periodic tick for real-time status updates
 
   useEffect(() => {
     const checkMlService = async () => {
@@ -74,6 +75,15 @@ export default function Dashboard() {
     fetchSchedule();
   }, []);
 
+  // Periodic tick for real-time status updates (every 60 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(t => t + 1);
+    }, 60000); // Update every 60 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Helper function to get class status based on time
   const getClassStatus = (startTime, endTime) => {
     const now = new Date();
@@ -99,8 +109,8 @@ export default function Dashboard() {
     }
   };
 
-  // Get next upcoming class
-  const getNextClass = () => {
+  // Get next upcoming class - memoized to avoid redundant computation
+  const nextClass = useMemo(() => {
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -113,7 +123,7 @@ export default function Dashboard() {
       }
     }
     return null;
-  };
+  }, [todayClasses, tick]); // Re-compute when classes or tick changes
 
   const getStatusBadge = () => {
     switch (mlStatus) {
@@ -181,14 +191,14 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  {!loadingSchedule && getNextClass() ? (
+                  {!loadingSchedule && nextClass ? (
                     <>
                       <span className="px-3 py-1 bg-[var(--bg-secondary)] text-[var(--text-body)] rounded-full font-medium">
-                        Next class: {getNextClass().subject || 'Class'} • {getNextClass().start_time}
+                        Next class: {nextClass.subject || 'Class'} • {nextClass.start_time}
                       </span>
-                      {getNextClass().room && (
+                      {nextClass.room && (
                         <span className="px-3 py-1 bg-[var(--bg-secondary)] text-[var(--text-body)] rounded-full font-medium">
-                          Room {getNextClass().room}
+                          Room {nextClass.room}
                         </span>
                       )}
                     </>
@@ -305,7 +315,7 @@ export default function Dashboard() {
                   <p className="text-[var(--text-body)]">No classes scheduled for today</p>
                 </div>
               ) : (
-                todayClasses.map((cls, index) => {
+                todayClasses.map((cls) => {
                   const status = getClassStatus(cls.start_time, cls.end_time);
                   const borderColorMap = {
                     success: 'border-l-[var(--success)]',
@@ -320,7 +330,7 @@ export default function Dashboard() {
 
                   return (
                     <div
-                      key={index}
+                      key={`${cls.slot}-${cls.start_time}`}
                       className={`bg-[var(--bg-card)] p-4 rounded-xl shadow-sm border border-[var(--border-color)] border-l-4 ${borderColorMap[status.color]}`}
                     >
                       <div className="flex justify-between items-start mb-2">
@@ -338,7 +348,7 @@ export default function Dashboard() {
                           </span>
                           {cls.room && <span>Room {cls.room}</span>}
                         </div>
-                        {status.status === 'upcoming' && status.startsIn && (
+                        {status.status === 'upcoming' && status.startsIn !== undefined && status.startsIn >= 0 && (
                           <span className="text-xs font-medium text-[var(--primary)]">
                             Starts in {status.startsIn} min
                           </span>
