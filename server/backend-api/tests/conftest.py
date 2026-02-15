@@ -9,38 +9,21 @@ os.environ["MONGO_DB_NAME"] = "test_smart_attendance"
 os.environ["JWT_SECRET"] = "test-secret-key-123"
 
 
-# MongoDB client shared across all tests but properly scoped
-_db_client = None
-
-
-async def get_db_client():
-    """Get or create the database client"""
-    global _db_client
-    if _db_client is None:
-        mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-        _db_client = AsyncIOMotorClient(mongo_uri, serverSelectionTimeoutMS=2000)
-        try:
-            await _db_client.admin.command("ping")
-        except Exception:
-            _db_client.close()
-            _db_client = None
-            pytest.skip("MongoDB not available - skipping integration tests")
-    return _db_client
-
-
-def pytest_sessionfinish(session, exitstatus):
-    """Clean up the MongoDB client at the end of the test session"""
-    global _db_client
-    if _db_client is not None:
-        _db_client.close()
-        _db_client = None
-
-
 @pytest_asyncio.fixture(scope="function")
 async def db_client():
     """Get the MongoDB client for tests"""
-    client = await get_db_client()
+    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+    client = AsyncIOMotorClient(mongo_uri, serverSelectionTimeoutMS=2000)
+    try:
+        await client.admin.command("ping")
+    except Exception:
+        client.close()
+        pytest.skip("MongoDB not available - skipping integration tests")
+    
     yield client
+    
+    # Close client after test
+    client.close()
 
 
 @pytest_asyncio.fixture(scope="function")
