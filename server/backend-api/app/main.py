@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
@@ -22,7 +22,10 @@ from app.services.ml_client import ml_client
 # New Imports
 from prometheus_fastapi_instrumentator import Instrumentator
 from .core.logging import setup_logging
-from .core.error_handlers import smart_attendance_exception_handler, generic_exception_handler
+from .core.error_handlers import (
+    smart_attendance_exception_handler,
+    generic_exception_handler,
+)
 from .core.exceptions import SmartAttendanceException
 from .middleware.correlation import CorrelationIdMiddleware
 from .middleware.timing import TimingMiddleware
@@ -40,8 +43,9 @@ if SENTRY_DSN := os.getenv("SENTRY_DSN"):
         dsn=SENTRY_DSN,
         environment=os.getenv("ENVIRONMENT", "development"),
         traces_sample_rate=0.1,
-        integrations=[FastApiIntegration()]
+        integrations=[FastApiIntegration()],
     )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -90,7 +94,9 @@ def create_app() -> FastAPI:
     )
 
     # Exception Handlers
-    app.add_exception_handler(SmartAttendanceException, smart_attendance_exception_handler)
+    app.add_exception_handler(
+        SmartAttendanceException, smart_attendance_exception_handler
+    )
     app.add_exception_handler(Exception, generic_exception_handler)
 
     # Routers
