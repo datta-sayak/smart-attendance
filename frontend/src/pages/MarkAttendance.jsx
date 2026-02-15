@@ -38,6 +38,26 @@ export default function MarkAttendance() {
 
   const [attendanceMap, setAttendanceMap] = useState({});
   const [attendanceSubmitted, setAttendanceSubmitted] = useState(false);
+  
+  const [currentCoords, setCurrentCoords] = useState(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported");
+      return;
+    }
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        setCurrentCoords({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+      },
+      (err) => console.error("Location error:", err),
+      { enableHighAccuracy: true }
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
 
   useEffect(() => {
     const checkMlService = async () => {
@@ -120,11 +140,11 @@ export default function MarkAttendance() {
     if (!selectedSubject || !webcamRef.current) return;
 
     const interval = setInterval(() => {
-      captureAndSend(webcamRef, selectedSubject, setDetections);
+      captureAndSend(webcamRef, selectedSubject, setDetections, currentCoords);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [selectedSubject]);
+  }, [selectedSubject, currentCoords]);
 
   const presentStudents = Object.values(attendanceMap)
     .filter((s) => s.status === "present")
