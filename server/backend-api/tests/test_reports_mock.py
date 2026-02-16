@@ -118,6 +118,7 @@ async def test_export_csv_logic():
 async def test_export_csv_not_found():
     mock_db = MagicMock()
     mock_db.subjects.find_one = AsyncMock(return_value=None) # Subject not found
+    mock_db.classes.find_one = AsyncMock(return_value=None) # Also not in classes
     
     teacher_id = ObjectId()
     subject_id = ObjectId()

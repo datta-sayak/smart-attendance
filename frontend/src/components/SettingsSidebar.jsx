@@ -1,5 +1,6 @@
 import React from "react";
-import { User, Sliders, AlertCircle, ScanFace, Heart,LogOut, } from "lucide-react";
+import PropTypes from "prop-types";
+import { User, Sliders, AlertCircle, ScanFace, Heart, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function SettingsSidebar({ activeTab, setActiveTab, onLogout}) {
@@ -33,33 +34,7 @@ export default function SettingsSidebar({ activeTab, setActiveTab, onLogout}) {
             {t(`settings.sidebar.${item.id}`)}
           </button>
         ))}
-        
       </div>
-
-      <nav className="flex-1 px-3 space-y-1">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
-                isActive
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Icon size={18} className={isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"} />
-                {item.label}
-              </div>
-              {isActive && <ChevronRight size={16} className="text-blue-600" />}
-            </button>
-          );
-        })}
-      </nav>
 
       <div className="p-4 border-t border-gray-100">
         <button

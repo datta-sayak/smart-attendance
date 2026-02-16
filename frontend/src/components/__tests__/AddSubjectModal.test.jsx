@@ -39,8 +39,8 @@ describe('AddSubjectModal Component', () => {
         expect(screen.getByRole('heading', { name: /add subject/i })).toBeInTheDocument();
 
         // Fill inputs
-        const nameInput = screen.getByPlaceholderText(/e.g. advanced mathematics/i);
-        const codeInput = screen.getByPlaceholderText(/e.g. mth-401/i);
+        const nameInput = screen.getByPlaceholderText(/enter subject name/i);
+        const codeInput = screen.getByPlaceholderText(/enter subject code/i);
 
         fireEvent.change(nameInput, { target: { value: 'Mathematics' } });
         fireEvent.change(codeInput, { target: { value: 'MTH101' } });

@@ -12,6 +12,7 @@ import {
   AlertTriangle
 } from "lucide-react"; 
 import { getTodaySchedule } from "../api/schedule";
+import StartAttendanceModal from "../components/attendance/StartAttendanceModal";
 
 export default function Dashboard() {
   const { t } = useTranslation();

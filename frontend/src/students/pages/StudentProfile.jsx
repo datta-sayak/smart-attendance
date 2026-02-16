@@ -20,6 +20,7 @@ import StudentNavigation from "../components/StudentNavigation"
 import { Link } from "react-router-dom";
 import { uploadFaceImage } from "../../api/students"
 import { useTranslation } from "react-i18next";
+import SubjectAttendanceCard from "../../components/SubjectAttendanceCard";
 
 export default function StudentProfile() {
   const { t, i18n } = useTranslation();
@@ -36,7 +37,7 @@ export default function StudentProfile() {
   });
 
   // Fetch detailed subjects
-  const { data: mySubjects, isLoading: subjectsLoading } = useQuery({
+  const { data: mySubjects } = useQuery({
     queryKey: ["mySubjects"],
     queryFn: fetchMySubjects,
   });
