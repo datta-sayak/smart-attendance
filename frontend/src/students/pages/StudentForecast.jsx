@@ -28,12 +28,14 @@ export default function StudentForecast() {
   // Formula: (Present + New) / (Total + New) * 100
   const presentSoFar = (currentAttendance / 100) * totalClassesSoFar;
   const denom = totalClassesSoFar + classesToAttend;
-  const projectedScore = denom > 0
-    ? Math.round(((presentSoFar + classesToAttend) / denom) * 100)
+  const projectedRatio = denom > 0
+    ? (presentSoFar + classesToAttend) / denom
     : 0;
 
+  const projectedScore = Math.round(projectedRatio * 100);
+
   const TARGET = 0.75;
-  const isEligible = projectedScore >= TARGET * 100;
+  const isEligible = projectedRatio >= TARGET * 100;
 
   const classesNeeded = (() => {
     if (totalClassesSoFar <= 0) return 1;
