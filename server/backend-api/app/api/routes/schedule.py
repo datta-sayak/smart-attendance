@@ -280,7 +280,15 @@ async def replace_full_schedule(
     for entry in entries:
         doc = entry.dict()
         if entry.subject_id and ObjectId.is_valid(entry.subject_id):
-            doc["subject_id"] = ObjectId(entry.subject_id)
+            subject_oid = ObjectId(entry.subject_id)
+            # Ensure the referenced subject actually exists to avoid orphaned schedule entries
+            subject = await db.subjects.find_one({"_id": subject_oid})
+            if not subject:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Subject with id {entry.subject_id} not found",
+                )
+            doc["subject_id"] = subject_oid
         doc["teacher_id"] = teacher["_id"]
         new_docs.append(doc)
 
