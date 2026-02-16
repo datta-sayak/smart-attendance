@@ -27,11 +27,10 @@ export const forgotPassword = async (email) => {
 };
 
 export const resetPassword = async (email, otp, newPassword) => {
-  return (
-    await api.post("/auth/reset-password", {
-      email,
-      otp,
-      new_password: newPassword,
-    })
-  ).data;
+  const res = await api.post("/auth/reset-password", {
+    email,
+    otp,
+    new_password: newPassword,
+  });
+  return res.data;
 };

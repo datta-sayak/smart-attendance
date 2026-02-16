@@ -12,6 +12,7 @@ import {
   AlertTriangle
 } from "lucide-react"; 
 import { getTodaySchedule } from "../api/schedule";
+import StartAttendanceModal from "../components/attendance/StartAttendanceModal";
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ export default function Dashboard() {
     const data = localStorage.getItem("user");
     return data ? JSON.parse(data) : null;
   });
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const [mlStatus, setMlStatus] = useState("checking"); // checking, ready, waking-up
   const [todayClasses, setTodayClasses] = useState([]);
   const [loadingSchedule, setLoadingSchedule] = useState(true);
@@ -201,12 +203,16 @@ export default function Dashboard() {
               <Download size={18} />
               {t('dashboard.download_report')}
             </button>
-            <Link to="/start-attendance" className="hover:bg-[var(--primary-hover)] px-4 py-2 bg-[var(--primary)] text-[var(--text-on-primary)] rounded-lg hover:bg-[var(--primary-hover)] font-medium shadow-sm flex items-center gap-2 transition-colors">
+            <Link to="/attendance" className="hover:bg-[var(--primary-hover)] px-4 py-2 bg-[var(--primary)] text-[var(--text-on-primary)] rounded-lg hover:bg-[var(--primary-hover)] font-medium shadow-sm flex items-center gap-2 transition-colors">
               <Play size={18} fill="currentColor" />
               {t('dashboard.startAttendance')}
             </Link>
           </div>
         </div>
+
+        {showAttendanceModal && (
+          <StartAttendanceModal onClose={() => setShowAttendanceModal(false)} />
+        )}
 
         {/* --- SECTION 2: MAIN GRID LAYOUT --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

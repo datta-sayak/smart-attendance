@@ -78,10 +78,11 @@ export default function ForgotPassword() {
 
     setLoading(true);
     try {
-      await forgotPassword(email);
+      await forgotPassword(normalizedEmail);
+      setEmail(normalizedEmail); // IMPORTANT: lock normalized value
       setStep(2);
       setResendCooldown(30);
-      setSuccess(t('forgot_password.alerts.code_sent', { email }));
+      setSuccess(t('forgot_password.alerts.code_sent', { normalizedEmail }));
     } catch (err) {
       setError(err.response?.data?.detail || t('common.error'));
     } finally {
@@ -94,7 +95,7 @@ export default function ForgotPassword() {
     clearMessages();
     setLoading(true);
     try {
-      await forgotPassword(email);
+      await forgotPassword(normalizedEmail);
       setResendCooldown(30);
       setSuccess(t('forgot_password.alerts.otp_sent'));
     } catch (err) {
@@ -124,14 +125,14 @@ export default function ForgotPassword() {
 
     setLoading(true);
     try {
-      await resetPassword(email, otp, newPassword);
+      await resetPassword(normalizedEmail, otp, newPassword);
       setSuccess(t('forgot_password.alerts.success'));
       setOtp("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-       // Specifically handle OTP errors here
-       setError(err.response?.data?.detail || t('common.error'));
+      // Specifically handle OTP errors here
+      setError(err.response?.data?.detail || t('common.error'));
     } finally {
       setLoading(false);
     }

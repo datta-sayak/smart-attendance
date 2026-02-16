@@ -2,44 +2,57 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Home, BookOpen, TrendingUp, User, CircleUser, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 
-/* ---------------------- DESKTOP NAV ITEM ---------------------- */
-// eslint-disable-next-line no-unused-vars
-function DesktopItem({ icon: IconComponent, label, active, path }) {
+function DesktopItem({ icon: Icon, label, active, path }) {
   return (
     <Link
       to={path}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium text-sm ${
         active
-          ? "bg-blue-50 text-blue-700"
-          : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+          ? "bg-blue-50 text-blue-600 shadow-sm shadow-blue-100"
+          : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
       }`}
     >
-      <IconComponent size={20} />
+      <Icon
+        size={18}
+        className={`transition-transform duration-200 ${
+          active ? "scale-110" : "group-hover:scale-110"
+        }`}
+      />
       {label}
     </Link>
   );
 }
 
-/* ---------------------- MOBILE NAV ITEM ---------------------- */
-// eslint-disable-next-line no-unused-vars
-function MobileItem({ icon: IconComponent, label, active, path }) {
+DesktopItem.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  label: PropTypes.string.isRequired,
+  active: PropTypes.bool.isRequired,
+  path: PropTypes.string.isRequired,
+};
+
+function MobileItem({ icon: Icon, label, active, path }) {
   return (
     <Link
       to={path}
-      className={`flex flex-col items-center gap-1 transition-colors ${
-        active ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
+      className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
+        active ? "text-blue-600" : "text-gray-400"
       }`}
     >
-      <div className={`p-1.5 rounded-xl ${active ? "bg-blue-50" : ""}`}>
-        <IconComponent size={20} strokeWidth={active ? 2.5 : 2} />
-      </div>
-      <span className="text-[10px] font-medium">{label}</span>
+      <Icon size={20} />
+      {label}
     </Link>
   );
 }
 
-/* ---------------------- MAIN NAVIGATION ---------------------- */
+MobileItem.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  label: PropTypes.string.isRequired,
+  active: PropTypes.bool.isRequired,
+  path: PropTypes.string.isRequired,
+};
+
 export default function StudentNavigation({ activePage = "home" }) {
   const { t } = useTranslation();
   const [username] = useState(() => {
@@ -118,3 +131,7 @@ export default function StudentNavigation({ activePage = "home" }) {
     </>
   );
 }
+
+StudentNavigation.propTypes = {
+  activePage: PropTypes.string,
+};
