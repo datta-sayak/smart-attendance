@@ -34,8 +34,8 @@ export default function StudentForecast() {
 
   const projectedScore = Math.round(projectedRatio * 100);
 
+
   const TARGET = 0.75;
-  const isEligible = projectedRatio >= TARGET * 100;
 
   const classesNeeded = (() => {
     if (totalClassesSoFar <= 0) return 1;
@@ -46,6 +46,9 @@ export default function StudentForecast() {
 
     return Math.max(0, Math.ceil(neededRaw));
   })();
+  
+  const meetsTargetWithSlider = classesToAttend >= classesNeeded;
+  const isEligible = meetsTargetWithSlider;
 
   const canReachWithinSlider = classesNeeded <= futureClassesMax;
 
