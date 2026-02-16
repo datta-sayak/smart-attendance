@@ -142,17 +142,16 @@ async def get_today_schedule(current_user: dict = Depends(get_current_user)):
             raise HTTPException(status_code=404, detail="Student profile not found")
 
         # Filter by branch and semester
-        # Note: If student semester is missing, this might return nothing or too much.
-        # Strict filtering:
-        if student.get("branch"):
-            query["branch"] = student["branch"]
-        if student.get("semester"):
-            query["semester"] = student["semester"]
-            
-        if not student.get("branch"):
-             # If branch is unknown, we cannot safely show class schedule for a student
-             return TodayScheduleResponse(classes=[], current_day=current_day)
+        # Both branch and semester are required to safely show a student's class schedule.
+        branch = student.get("branch")
+        semester = student.get("semester")
 
+        if not branch or not semester:
+            # If branch or semester is unknown, we cannot safely show class schedule for a student
+            return TodayScheduleResponse(classes=[], current_day=current_day)
+
+        query["branch"] = branch
+        query["semester"] = semester
     else:
         raise HTTPException(status_code=403, detail="Role not authorized")
 
