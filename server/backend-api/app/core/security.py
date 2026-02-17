@@ -69,7 +69,10 @@ async def get_current_user(
             ):
                 raise HTTPException(
                     status_code=401,
-                    detail="SESSION_CONFLICT: You have been logged out because this account was logged in on another device",
+                    detail=(
+                        "SESSION_CONFLICT: You have been logged out because "
+                        "this account was logged in on another device"
+                    ),
                 )
         except HTTPException:
             raise

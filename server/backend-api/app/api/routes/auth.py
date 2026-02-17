@@ -247,7 +247,10 @@ async def refresh_token(request: Request, payload: RefreshTokenRequest):
             ):
                 raise HTTPException(
                     status_code=401,
-                    detail="SESSION_CONFLICT: You have been logged out because this account was logged in on another device",
+                    detail=(
+                        "SESSION_CONFLICT: You have been logged out because "
+                        "this account was logged in on another device"
+                    ),
                 )
 
         # Generate new tokens with the same session ID to maintain session continuity
