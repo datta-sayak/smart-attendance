@@ -270,8 +270,8 @@ def low_attendance_warning_template(
     subject: str, 
     attendance_percentage: float, 
     threshold: int,
-    present_count: int,
-    total_count: int
+    present_count: int = 0,
+    total_count: int = 0
 ) -> str:
     """Generate HTML email for low attendance warning."""
     safe_student = html.escape(student_name)
