@@ -68,7 +68,7 @@ export default function Header() {
               to={link.to}
               className={`px-3 py-2 rounded-lg text-sm font-semibold ${
                 isActive(link.to)
-                  ? "text-[var(--primary)] bg-[var(--primary-hover)]/20"
+                  ? "text-[var(--primary)] bg-[var(--action-info-bg)]/10"
                   : "text-[var(--text-body)] hover:text-[var(--primary)] hover:bg-[var(--bg-secondary)]"
               }`}
             >
@@ -130,7 +130,7 @@ export default function Header() {
               to={link.to}
               className={`block px-4 py-2.5 rounded-lg text-sm font-semibold ${
                 isActive(link.to)
-                  ? "text-[var(--primary)] bg-[var(--primary-hover)]/20"
+                  ? "text-[var(--primary)] bg-[var(--action-info-bg)]/10"
                   : "text-[var(--text-body)] hover:text-[var(--primary)] hover:bg-[var(--bg-secondary)]"
               }`}
             >
