@@ -9,8 +9,71 @@ from cloudinary.uploader import upload
 import base64
 from app.services.ml_client import ml_client
 
+from app.services import schedule_service
+from datetime import datetime
+import pytz
+import os
+# from typing import List
 
 router = APIRouter(prefix="/students", tags=["students"])
+
+
+# ============================
+# GET TODAY'S SCHEDULE
+# ============================
+@router.get("/me/today-schedule")
+async def api_get_my_today_schedule(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "student":
+        raise HTTPException(status_code=403, detail="Not a student")
+
+    student = await db.students.find_one({"userId": ObjectId(current_user["id"])})
+    if not student:
+        raise HTTPException(status_code=404, detail="Student profile not found")
+
+    # Ensure subject_ids are strings for the query
+    raw_subject_ids = student.get("subjects", [])
+    str_subject_ids = [str(sid) for sid in raw_subject_ids]
+
+    # Get current day
+    timezone_str = os.getenv("SCHOOL_TIMEZONE", "Asia/Kolkata")
+    try:
+        school_tz = pytz.timezone(timezone_str)
+    except pytz.UnknownTimeZoneError:
+        school_tz = pytz.timezone("Asia/Kolkata")
+
+    days_of_week = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+    now_in_school_tz = datetime.now(school_tz)
+    current_day = days_of_week[now_in_school_tz.weekday()]
+
+    entries = await schedule_service.get_student_schedule_for_day(
+        str_subject_ids, current_day
+    )
+
+    # Process entries for frontend
+    schedule_list = []
+    for entry in entries:
+        schedule_list.append({
+            "id": str(entry.get("_id", "")),
+            "subject_name": entry.get("subject_name", "Unknown Subject"),
+            "start_time": entry.get("start_time", ""),
+            "end_time": entry.get("end_time", ""),
+            "room": entry.get("room", ""),
+            "status": "scheduled" # Will be calculated on frontend or here
+        })
+    
+    return {
+        "day": current_day,
+        "date": now_in_school_tz.strftime("%Y-%m-%d"),
+        "classes": schedule_list
+    }
 
 
 # ============================
@@ -140,7 +203,7 @@ async def get_my_subjects(current_user: dict = Depends(get_current_user)):
             (
                 s
                 for s in sub.get("students", [])
-                if str(s.get("student_id")) == str(student.get("_id"))
+                if str(s.get("student_id")) == str(student_oid)
             ),
             None,
         )
@@ -151,15 +214,26 @@ async def get_my_subjects(current_user: dict = Depends(get_current_user)):
             else {"present": 0, "absent": 0, "total": 0, "percentage": 0}
         )
 
+        # Calculate percentage as fallback (in case it's not stored or is 0)
+        total = attendance_data.get("total", 0)
+        present = attendance_data.get("present", 0)
+        percentage = attendance_data.get("percentage", 0)
+        
+        if total > 0 and percentage == 0:
+            # Recalculate if total is set but percentage is 0
+            percentage = round((present / total) * 100, 2)
+        elif total == 0:
+            percentage = 0
+
         results.append(
             {
                 "id": str(sub["_id"]),
                 "name": sub["name"],
                 "code": sub.get("code"),
                 "type": sub.get("type", "Core"),
-                "attendance": attendance_data.get("percentage", 0),
-                "attended": attendance_data.get("present", 0),
-                "total": attendance_data.get("total", 0),
+                "attendance": percentage,
+                "attended": present,
+                "total": total,
             }
         )
 

@@ -29,6 +29,7 @@ export default defineConfig({
       '/api': {
         target: 'https://smart-attendance-api-i87a.onrender.com',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
         secure: false,
       },
       '/static': {
