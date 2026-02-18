@@ -25,7 +25,7 @@ class HolidayCreate(BaseModel):
 class HolidayResponse(BaseModel):
     """Schema for a holiday returned from the API."""
     id: str = Field(..., description="Unique identifier for the holiday")
-    date: str = Field(..., description="ISO date string of the holiday")
+    date: date = Field(..., description="The date of the holiday (YYYY-MM-DD)")
     name: str = Field(..., description="Name of the holiday")
 
 
