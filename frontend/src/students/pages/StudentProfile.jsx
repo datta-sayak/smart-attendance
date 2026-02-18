@@ -21,10 +21,15 @@ import { Link } from "react-router-dom";
 import { uploadFaceImage } from "../../api/students"
 import { useTranslation } from "react-i18next";
 import SubjectAttendanceCard from "../../components/SubjectAttendanceCard";
+import { useTheme } from "../../theme/ThemeContext";
+
+
 
 export default function StudentProfile() {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -198,6 +203,34 @@ export default function StudentProfile() {
               }
             }}
           />
+
+          {/* Card: Appearance / Theme Settings */}
+<div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-sm p-6">
+  <h4 className="text-base font-bold text-slate-800 mb-1">
+    Appearance
+  </h4>
+  <p className="text-xs text-[var(--text-main)] mb-4">
+    Customize the look and feel of the application.
+  </p>
+
+  <div className="flex items-center gap-4">
+    <label className="text-sm font-medium text-[var(--text-body)]">
+      Theme
+    </label>
+
+    <select
+      value={theme}
+      onChange={(e) => setTheme(e.target.value)}
+      className="px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] text-sm cursor-pointer focus:outline-none"
+    >
+      <option value="Light">Light</option>
+      <option value="Dark">Dark</option>
+      <option value="Forest">Forest</option>
+      <option value="Cyber">Cyber</option>
+    </select>
+  </div>
+</div>
+
 
           {/* Card 2: Face Image Upload */}
           <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-sm p-6 space-y-4">
