@@ -9,7 +9,6 @@ The model is downloaded from one of the official MediaPipe model repositories:
 1. Primary: Google Cloud Storage (mediapipe-assets)
 2. Fallback: GitHub releases or alternative mirrors
 """
-import os
 import sys
 import urllib.request
 from pathlib import Path

@@ -6,6 +6,10 @@ import sys
 # Add parent directory to path to import download_models
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Minimum expected model file size (BlazeFace model is ~200-300 KB)
+# We use 1KB as a sanity check to detect obviously corrupted/placeholder files
+MIN_MODEL_SIZE_BYTES = 1000  # 1 KB - very conservative threshold
+
 
 def test_model_path_resolution():
     """Test that the model path is correctly resolved in face_detector"""
@@ -39,7 +43,8 @@ def test_model_file_exists():
     
     # Verify it's not empty
     assert model_path.stat().st_size > 0, "Model file is empty"
-    assert model_path.stat().st_size > 1000, "Model file is too small (likely corrupted)"
+    assert model_path.stat().st_size > MIN_MODEL_SIZE_BYTES, \
+        f"Model file is too small ({model_path.stat().st_size} bytes, expected >{MIN_MODEL_SIZE_BYTES})"
 
 
 def test_download_models_script_exists():

@@ -54,7 +54,10 @@ blaze_face_short_range.tflite  (~200-300 KB)
 **FileNotFoundError in Docker:**
 - Ensure the download script runs successfully during build
 - Check Docker build logs for any download errors
-- Verify `.dockerignore` doesn't exclude `.tflite` files
+- Verify `.dockerignore` doesn't exclude `.tflite` files (it doesn't)
+- NOTE: `.tflite` files ARE excluded from git via `.gitignore` by design
+  - This is intentional - models are downloaded at runtime, not committed
+  - See the download_models.py script for automatic fetching
 
 **403 Forbidden errors:**
 - This is normal in restricted network environments
@@ -63,16 +66,18 @@ blaze_face_short_range.tflite  (~200-300 KB)
 - For local development, use manual download option
 
 **Model file missing after build:**
-- Check if `.gitignore` excludes `.tflite` files (it shouldn't)
-- Ensure Dockerfile includes `RUN python3 download_models.py`
+- `.tflite` files are intentionally excluded from git (see `.gitignore`)
+- The model must be downloaded using `download_models.py` or at runtime
+- Ensure Dockerfile includes `RUN python3 download_models.py` or uses entrypoint.sh
 - Rebuild the Docker image: `docker build --no-cache .`
 
 ### Why Not Commit the Model?
 
-The model file (~300KB) could be committed to git, but:
+The model file (~300KB) is intentionally excluded from git via `.gitignore` because:
 - Keeps repository size smaller
 - Allows easy model updates
 - Follows MediaPipe best practices
 - Model is downloaded once during build, then cached in Docker layers
+- Binary files in git cause merge conflicts and bloat history
 
-If you prefer to commit it, add the file to git and the Dockerfile will use it automatically (the download script checks if file exists first).
+The model is automatically fetched at build/runtime, ensuring it's always available without being tracked in version control.
