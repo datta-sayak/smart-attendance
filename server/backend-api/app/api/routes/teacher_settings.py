@@ -228,6 +228,39 @@ async def upload_avatar(
     }
 
 
+# ---------------- RESET FACE DATA ----------------
+@router.delete("/reset-face-data")
+async def reset_face_data(current: dict = Depends(get_current_teacher)):
+    """Delete all face recognition data for the current teacher."""
+    user_id = validate_object_id(current["id"])
+    
+    try:
+        # Remove face_embeddings from the teacher document
+        result = await db.teachers.update_one(
+            {"userId": user_id},
+            {
+                "$unset": {"face_embeddings": ""},
+                "$set": {"updatedAt": datetime.utcnow()}
+            }
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Teacher not found")
+        
+        return {
+            "message": "Face recognition data has been successfully deleted",
+            "success": True
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to reset face data: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete face recognition data"
+        )
+
+
 # Add - Subject
 @router.post("/add-subject", response_model=dict)
 async def add_subject(payload: dict, current: dict = Depends(get_current_teacher)):

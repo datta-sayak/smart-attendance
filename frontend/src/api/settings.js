@@ -32,3 +32,8 @@ export const sendLowAttendanceNotice = async () => {
   const res = await api.post("/settings/send-low-attendance-notice");
   return res.data;
 };
+
+export const resetFaceData = async () => {
+  const res = await api.delete("/settings/reset-face-data");
+  return res.data;
+};

@@ -29,6 +29,7 @@ import {
   uploadAvatar,
   addSubject,
   sendLowAttendanceNotice,
+  resetFaceData,
 } from "../api/settings";
 import { logout as apiLogout } from "../api/auth";
 import AddSubjectModal from "../components/AddSubjectModal";
@@ -95,6 +96,9 @@ export default function Settings() {
   // State for Face Settings
   const [liveness, setLiveness] = useState(true);
   const [sensitivity, setSensitivity] = useState(80);
+  const [showResetFaceModal, setShowResetFaceModal] = useState(false);
+  const [resettingFaceData, setResettingFaceData] = useState(false);
+  const sensitivityTimeoutRef = useRef(null);
 
   // State for email preff
   const [_emailPreferences, setEmailPreferences] = useState(false);
@@ -359,6 +363,37 @@ export default function Settings() {
       setSaveError(t('settings.alerts.avatar_failed'));
     }
   }
+
+  // Reset Face Data Handler with confirmation
+  async function handleResetFaceData() {
+    setResettingFaceData(true);
+    try {
+      await resetFaceData();
+      setShowResetFaceModal(false);
+      toast.success("Face recognition data has been successfully deleted");
+    } catch (err) {
+      console.error("Reset face data failed:", err);
+      toast.error(err.response?.data?.detail || "Failed to reset face data");
+    } finally {
+      setResettingFaceData(false);
+    }
+  }
+
+  // Debounced sensitivity handler
+  const handleSensitivityChange = (value) => {
+    setSensitivity(value);
+    
+    // Clear previous timeout
+    if (sensitivityTimeoutRef.current) {
+      clearTimeout(sensitivityTimeoutRef.current);
+    }
+    
+    // Set new timeout to update after user stops dragging
+    sensitivityTimeoutRef.current = setTimeout(() => {
+      // Auto-save could be triggered here if needed
+      // For now, it will be saved when user clicks "Apply Changes"
+    }, 500);
+  };
 
   // UI: show a simple loading state until data is loaded
   if (!loaded) {
@@ -884,27 +919,7 @@ export default function Settings() {
                   </p>
                 </div>
 
-                {/* 1. Enrolment Status */}
-                <div className="p-6 border border-[var(--border-color)] rounded-xl bg-[var(--bg-secondary)] flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-[var(--success)]/10 text-[var(--success)] rounded-full flex items-center justify-center">
-                      <Camera size={28} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-[var(--text-main)]">
-                        {t('settings.face_settings.face_data')}
-                      </h4>
-                      <p className="text-sm text-[var(--text-body)] opacity-70">
-                        {t('settings.face_settings.last_updated')}
-                      </p>
-                    </div>
-                  </div>
-                  <button className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-body)] rounded-lg text-sm font-medium hover:bg-[var(--bg-secondary)] shadow-sm flex items-center gap-2 cursor-pointer">
-                    <RefreshCw size={16} /> {t('settings.face_settings.recalibrate')}
-                  </button>
-                </div>
-
-                {/* 2. Recognition Sensitivity Slider */}
+                {/* Recognition Sensitivity Slider */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-semibold text-[var(--text-main)]">
@@ -919,7 +934,7 @@ export default function Settings() {
                     min="50"
                     max="99"
                     value={sensitivity}
-                    onChange={(e) => setSensitivity(e.target.value)}
+                    onChange={(e) => handleSensitivityChange(e.target.value)}
                     className="w-full h-2 bg-[var(--bg-secondary)] rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
                   />
                   <p className="text-xs text-[var(--text-body)] opacity-90">
@@ -958,7 +973,7 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {/* 4. Danger Zone */}
+                {/* Danger Zone */}
                 <div className="pt-6 border-t border-[var(--border-color)]">
                   <h4 className="text-sm font-bold text-[var(--danger)] mb-4">
                     {t('settings.face_settings.danger_zone')}
@@ -972,7 +987,9 @@ export default function Settings() {
                         {t('settings.face_settings.reset_desc')}
                       </p>
                     </div>
-                    <button className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--danger)]/20 text-[var(--danger)] rounded-lg text-sm font-medium hover:bg-[var(--danger)]/20 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                    <button 
+                      onClick={() => setShowResetFaceModal(true)}
+                      className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--danger)]/20 text-[var(--danger)] rounded-lg text-sm font-medium hover:bg-[var(--danger)]/20 transition shadow-sm flex items-center gap-2 cursor-pointer">
                       <Trash2 size={16} /> {t('settings.face_settings.reset_data')}
                     </button>
                   </div>
@@ -1078,6 +1095,48 @@ export default function Settings() {
         onClose={() => setShowLogoutConfirm(false)}
         onConfirm={confirmLogout}
       />
+
+      {/* Reset Face Data Confirmation Dialog */}
+      {showResetFaceModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-[var(--bg-card)] rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-[var(--border-color)]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-[var(--danger)]/10 text-[var(--danger)] rounded-full">
+                <Trash2 size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-[var(--text-main)]">
+                Reset Face Recognition Data
+              </h3>
+            </div>
+            <p className="text-[var(--text-body)] mb-6">
+              Are you sure you want to delete your face recognition data? This action cannot be undone and you will need to re-enroll your face for attendance tracking.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowResetFaceModal(false)}
+                disabled={resettingFaceData}
+                className="px-6 py-2.5 rounded-xl text-sm font-medium text-[var(--text-body)] hover:bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetFaceData}
+                disabled={resettingFaceData}
+                className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[var(--danger)] text-white hover:opacity-90 shadow-md disabled:opacity-50"
+              >
+                {resettingFaceData ? "Deleting..." : "Delete Data"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSubjectModal && (
+        <AddSubjectModal
+          onClose={() => setShowSubjectModal(false)}
+          onSave={handleAddSubject}
+        />
+      )}
     </div>
   );
 }
