@@ -52,8 +52,12 @@ describe('Login Page', () => {
         );
 
         expect(screen.getByRole('heading', { name: /auth.signInTitle/i })).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/enter your email/i)).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/enter your password/i)).toBeInTheDocument();
+        // Use specific input elements with their IDs which are accessible
+        expect(screen.getByRole('textbox', { name: /email/i })).toBeInTheDocument();
+        // Password input is accessible via its ID
+        const passwordInput = document.getElementById('password-input');
+        expect(passwordInput).toBeInTheDocument();
+        expect(passwordInput?.getAttribute('type')).toMatch(/password|text/);
     });
 
     it('handles successful teacher login', async () => {
@@ -76,12 +80,17 @@ describe('Login Page', () => {
             </BrowserRouter>
         );
 
-        // Fill form
-        fireEvent.change(screen.getByPlaceholderText(/enter your email/i), { target: { value: 'teacher@test.com' } });
-        fireEvent.change(screen.getByPlaceholderText(/enter your password/i), { target: { value: 'password123' } });
+        // Fill form using more specific queries
+        const emailInput = screen.getByRole('textbox', { name: /email/i });
+        const passwordInput = document.getElementById('password-input');
+        
+        fireEvent.change(emailInput, { target: { value: 'teacher@test.com' } });
+        if (passwordInput) {
+            fireEvent.change(passwordInput, { target: { value: 'password123' } });
+        }
 
         // Submit
-        const submitBtn = screen.getByRole('button', { name: /sign in/i });
+        const submitBtn = screen.getByRole('button', { name: /submit login form/i });
         fireEvent.click(submitBtn);
 
         // Verify API call
@@ -119,10 +128,15 @@ describe('Login Page', () => {
             </BrowserRouter>
         );
 
-        fireEvent.change(screen.getByPlaceholderText(/enter your email/i), { target: { value: 'wrong@test.com' } });
-        fireEvent.change(screen.getByPlaceholderText(/enter your password/i), { target: { value: 'wrongpass' } });
+        const emailInput = screen.getByRole('textbox', { name: /email/i });
+        const passwordInput = document.getElementById('password-input');
+        
+        fireEvent.change(emailInput, { target: { value: 'wrong@test.com' } });
+        if (passwordInput) {
+            fireEvent.change(passwordInput, { target: { value: 'wrongpass' } });
+        }
 
-        const submitBtn = screen.getByRole('button', { name: /sign in/i });
+        const submitBtn = screen.getByRole('button', { name: /submit login form/i });
         fireEvent.click(submitBtn);
 
         await waitFor(() => {
